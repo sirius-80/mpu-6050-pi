@@ -93,6 +93,7 @@ print "X Rotation: " , get_x_rotation(accelleration_xout_scale, accelleration_yo
 print "Y Rotation: " , get_y_rotation(accelleration_xout_scale, accelleration_yout_scale, accelleration_zout_scale)
 
 
+vx = vy = vz = 0
 while True:
     try:
         (rotation_x, rotation_y) = get_rotations()
@@ -105,7 +106,10 @@ while True:
         accelleration_xout_scale = accelleration_xout / 16384.0
         accelleration_yout_scale = accelleration_yout / 16384.0
         accelleration_zout_scale = accelleration_zout / 16384.0
-
+        vx += accelleration_xout_scale
+        vy += accelleration_yout_scale
+        vz += accelleration_zout_scale
+        print("V = (%f, %f, %f)" % (vx, vy, vz))
         publish.single('x', str(rotation_x), hostname=MQTT_SERVER)
         publish.single('y', str(rotation_y), hostname=MQTT_SERVER)
         publish.single('accelx', str(accelleration_xout_scale), hostname=MQTT_SERVER);
