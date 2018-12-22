@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - geometry - cube</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				margin: 0px;
+				background-color: #000000;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<script src="https://threejs.org/build/three.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+
+		<script>
+
+			/* Initialize MQTT */
+			var wsbroker = "localhost";//location.hostname;
+			var wsport = 9001;
+			var client = new Paho.MQTT.Client(wsbroker, wsport, "browserid_" + parseInt(Math.random() * 100, 10));
+			client.onConnectionLost = function(responseObject) {
+				console.log("CONNECTION LOST - " + responseObject.errorMessage);
+			};
+            client.onMessageArrived = function (message) {
+                // console.log("RECEIVE ON " + message.destinationName + " PAYLOAD " + message.payloadString);
+                var rotation =  parseFloat(message.payloadString);
+                switch (message.destinationName) {
+                    case "x":
+                        // console.log("Rotate X "+ rotation);
+                        setXRotation(rotation);
+                        break;
+                    case "y":
+                        // console.log("Rotate X "+ rotation);
+                        setZRotation(rotation);
+                        break;
+                    case "z":
+                        // console.log("Rotate Z "+ rotation);
+                        // setZRotation(rotation);
+                        break;
+                    default:
+                        console.log("RECEIVE UNKNOWN MESSAGE ON " + message.destinationName + " PAYLOAD " + message.payloadString);
+                }
+            };
+
+			// connect
+			var options = {
+				onSuccess: function () {
+					console.log("CONNECTION SUCCESS");
+					client.subscribe('x');
+					client.subscribe('y');
+					client.subscribe('z');
+				},
+				onFailure: function (message) {
+					console.log("CONNECTION FAILURE - " + message.errorMessage);
+				}
+			};
+			console.log("CONNECT TO " + wsbroker + ":" + wsport);
+			client.connect(options);
+
+			/* Three (3D visualization) starts here */
+			var camera, scene, renderer;
+			var mesh;
+
+			init();
+			animate();
+
+			function init() {
+
+				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
+				camera.position.z = 400;
+
+				scene = new THREE.Scene();
+
+				var texture = new THREE.TextureLoader().load( 'GY-521.gif' );
+
+				var geometry = new THREE.BoxBufferGeometry( 200, 10, 200 );
+				var material = new THREE.MeshBasicMaterial( { map: texture } );
+
+				mesh = new THREE.Mesh( geometry, material );
+				scene.add( mesh );
+
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+
+				//
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function setXRotation(x) {
+			    mesh.rotation.x = x;
+            }
+
+            function setYRotation(y) {
+                mesh.rotation.y = y;
+            }
+
+            function setZRotation(z) {
+                mesh.rotation.z = z;
+            }
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				// mesh.rotation.x += 0.005;
+				// mesh.rotation.y += 0.01;
+				// mesh.rotation.z += 0.003;
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+
+	</body>
+</html>
