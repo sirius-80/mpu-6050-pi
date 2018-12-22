@@ -37,10 +37,10 @@ def get_x_rotation(x,y,z):
     radians = math.atan2(y, dist(x,z))
     return radians
  
-bus = smbus.SMBus(1) # bus = smbus.SMBus(0) fuer Revision 1
+bus = smbus.SMBus(1) # bus = smbus.SMBus(0) for Revision 1
 address = 0x68       # via i2cdetect
  
-# Aktivieren, um das Modul ansprechen zu koennen
+# Initialize MPU-6050
 bus.write_byte_data(address, power_mgmt_1, 0)
 
 def get_rotations():
@@ -69,9 +69,9 @@ gyro_xout = read_word_2c(0x43)
 gyro_yout = read_word_2c(0x45)
 gyro_zout = read_word_2c(0x47)
  
-print "gyro_xout: ", ("%5d" % gyro_xout), " scale: ", (gyro_xout / 131)
-print "gyro_yout: ", ("%5d" % gyro_yout), " scale: ", (gyro_yout / 131)
-print "gyro_zout: ", ("%5d" % gyro_zout), " scale: ", (gyro_zout / 131)
+print "gyro_xout: ", ("%5d" % gyro_xout), " scale: ", (gyro_xout / 131.0)
+print "gyro_yout: ", ("%5d" % gyro_yout), " scale: ", (gyro_yout / 131.0)
+print "gyro_zout: ", ("%5d" % gyro_zout), " scale: ", (gyro_zout / 131.0)
  
 print
 print "accellerationssensor"
