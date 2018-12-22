@@ -67,6 +67,7 @@
             client.onConnectionLost = function(responseObject) {
                 console.log("CONNECTION LOST - " + responseObject.errorMessage);
             };
+            var msgCount = 0;
             client.onMessageArrived = function (message) {
                 // console.log("RECEIVE ON " + message.destinationName + " PAYLOAD " + message.payloadString);
                 var accel =  parseFloat(message.payloadString);
@@ -74,7 +75,7 @@
                     case "accelx":
                         // console.log("Rotate X "+ rotation);
                         console.log("Adding accelleration x " + accel);
-                        updateAccel(accel);
+                        updateAccel(msgCount++, accel);
                         break;
                     case "y":
                         // console.log("Rotate X "+ rotation);
