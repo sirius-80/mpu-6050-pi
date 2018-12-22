@@ -97,7 +97,17 @@ while True:
     try:
         (rotation_x, rotation_y) = get_rotations()
         print("Sending update: (%f, %f)" % (rotation_x, rotation_y))
+
+        accelleration_xout = read_word_2c(0x3b)
+        accelleration_yout = read_word_2c(0x3d)
+        accelleration_zout = read_word_2c(0x3f)
+
+        accelleration_xout_scale = accelleration_xout / 16384.0
+        accelleration_yout_scale = accelleration_yout / 16384.0
+        accelleration_zout_scale = accelleration_zout / 16384.0
+
         publish.single('x', str(rotation_x), hostname=MQTT_SERVER)
         publish.single('y', str(rotation_y), hostname=MQTT_SERVER)
+        publish.single('accelx', str(accelleration_xout_scale));
     except IOError:
         time.sleep(0.1)

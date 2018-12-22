@@ -1,0 +1,113 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+
+    <script>
+        window.onload = function () {
+
+            var dps = []; // dataPoints
+            var chart = new CanvasJS.Chart("chartContainer", {
+                title :{
+                    text: "Dynamic Data"
+                },
+                axisY: {
+                    includeZero: false
+                },
+                data: [{
+                    type: "line",
+                    dataPoints: dps
+                }]
+            });
+
+            var xVal = 0;
+            var yVal = 100;
+            var updateInterval = 1000;
+            var dataLength = 200; // number of dataPoints visible at any point
+
+            var updateAccel = function (count, accel) {
+                dps.push({
+                    x: count,
+                    y: accel
+                });
+                if (dps.length > dataLength) {
+                    dps.shift();
+                }
+                chart.render();
+            }
+
+            // var updateChart = function (count) {
+            //
+            //     count = count || 1;
+            //
+            //     for (var j = 0; j < count; j++) {
+            //         yVal = yVal +  Math.round(5 + Math.random() *(-5-5));
+            //         dps.push({
+            //             x: xVal,
+            //             y: yVal
+            //         });
+            //         xVal++;
+            //     }
+            //
+            //     if (dps.length > dataLength) {
+            //         dps.shift();
+            //     }
+            //
+            //     chart.render();
+            // };
+
+            // updateChart(dataLength);
+            // setInterval(function(){updateChart()}, updateInterval);
+
+
+            /* Initialize MQTT */
+            var wsbroker = "localhost";//location.hostname;
+            var wsport = 9001;
+            var client = new Paho.MQTT.Client(wsbroker, wsport, "browserid_" + parseInt(Math.random() * 100, 10));
+            client.onConnectionLost = function(responseObject) {
+                console.log("CONNECTION LOST - " + responseObject.errorMessage);
+            };
+            client.onMessageArrived = function (message) {
+                // console.log("RECEIVE ON " + message.destinationName + " PAYLOAD " + message.payloadString);
+                var accel =  parseFloat(message.payloadString);
+                switch (message.destinationName) {
+                    case "accelx":
+                        // console.log("Rotate X "+ rotation);
+                        updateAccel(accel);
+                        break;
+                    case "y":
+                        // console.log("Rotate X "+ rotation);
+                        // setZRotation(rotation);
+                        break;
+                    case "z":
+                        // console.log("Rotate Z "+ rotation);
+                        // setZRotation(rotation);
+                        break;
+                    default:
+                        console.log("RECEIVE UNKNOWN MESSAGE ON " + message.destinationName + " PAYLOAD " + message.payloadString);
+                }
+            };
+
+            // connect
+            var options = {
+                onSuccess: function () {
+                    console.log("CONNECTION SUCCESS");
+                    client.subscribe('accelx');
+                    client.subscribe('accely');
+                    client.subscribe('accelz');
+                },
+                onFailure: function (message) {
+                    console.log("CONNECTION FAILURE - " + message.errorMessage);
+                }
+            };
+            console.log("CONNECT TO " + wsbroker + ":" + wsport);
+            client.connect(options);
+
+        }
+    </script>
+</head>
+<body>
+<div id="chartContainer" style="height: 370px; width:100%;"></div>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+</body>
+</html>
