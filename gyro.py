@@ -108,6 +108,6 @@ while True:
 
         publish.single('x', str(rotation_x), hostname=MQTT_SERVER)
         publish.single('y', str(rotation_y), hostname=MQTT_SERVER)
-        publish.single('accelx', str(accelleration_xout_scale));
+        publish.single('accelx', str(accelleration_xout_scale), hostname=MQTT_SERVER);
     except IOError:
         time.sleep(0.1)
