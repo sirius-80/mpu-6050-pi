@@ -78,6 +78,11 @@
                 }
                 chartZ.render();
             };
+            var updateCharts() {
+                chartX.render();
+                chartY.render();
+                chartZ.render();
+            }
 
             /* Initialize MQTT */
             var wsbroker = "localhost";//location.hostname;
@@ -89,26 +94,35 @@
             var msgCount = 0;
             client.onMessageArrived = function (message) {
                 // console.log("RECEIVE ON " + message.destinationName + " PAYLOAD " + message.payloadString);
-                var accel =  parseFloat(message.payloadString);
-                switch (message.destinationName) {
-                    case "accelx":
-                        // console.log("Rotate X "+ rotation);
-                        // console.log("Adding accelleration x " + accel);
-                        updateAccelX(msgCount++, accel);
-                        break;
-                    case "accely":
-                        // console.log("Rotate X "+ rotation);
-                        updateAccelY(msgCount++, accel);
-                        // setZRotation(rotation);
-                        break;
-                    case "accelz":
-                        // console.log("Rotate Z "+ rotation);
-                        // setZRotation(rotation);
-                        updateAccelZ(msgCount++, accel);
-                        break;
-                    default:
-                        console.log("RECEIVE UNKNOWN MESSAGE ON " + message.destinationName + " PAYLOAD " + message.payloadString);
-                }
+                var accelleration = message.payloadString.split(",");
+                var accel_x = parseFloat(accelleration[0]);
+                var accel_y = parseFloat(accelleration[1]);
+                var accel_z = parseFloat(accelleration[2]);
+                updateAccelX(msgCount, accel_x);
+                updateAccelY(msgCount, accel_y);
+                updateAccelZ(msgCount, accel_z);
+                updateCharts();
+                // var accel =  parseFloat(message.payloadString);
+                // switch (message.destinationName) {
+                //     case "accelx":
+                //         // console.log("Rotate X "+ rotation);
+                //         // console.log("Adding accelleration x " + accel);
+                //         updateAccelX(msgCount++, accel);
+                //         break;
+                //     case "accely":
+                //         // console.log("Rotate X "+ rotation);
+                //         updateAccelY(msgCount++, accel);
+                //         // setZRotation(rotation);
+                //         break;
+                //     case "accelz":
+                //         // console.log("Rotate Z "+ rotation);
+                //         // setZRotation(rotation);
+                //         updateAccelZ(msgCount++, accel);
+                //         break;
+                //     default:
+                //         console.log("RECEIVE UNKNOWN MESSAGE ON " + message.destinationName + " PAYLOAD " + message.payloadString);
+                // }
+                console.log(msgCount)
             };
 
             // connect

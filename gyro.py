@@ -113,8 +113,9 @@ while True:
         print("V = (%f, %f, %f)" % (vx, vy, vz))
         client.publish('x', str(rotation_x))
         client.publish('y', str(rotation_y))
-        client.publish('accelx', str(accelleration_xout_scale))
-        client.publish('accely', str(accelleration_yout_scale))
-        client.publish('accelz', str(accelleration_zout_scale))
+        client.publish('accel', "%f,%f,%f" % (accelleration_xout_scale, accelleration_yout_scale, accelleration_zout_scale))
+        # client.publish('accelx', str(accelleration_xout_scale))
+        # client.publish('accely', str(accelleration_yout_scale))
+        # client.publish('accelz', str(accelleration_zout_scale))
     except IOError:
         time.sleep(0.1)

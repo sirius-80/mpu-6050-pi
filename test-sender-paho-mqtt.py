@@ -21,7 +21,7 @@ client.loop_start()
 while True:
     client.publish('x', str(x))
     client.publish('y', str(y))
-    client.publish('z', str(z))
+    client.publish('accelz', str(z))
     x += dx
     y += dy
     z += dz
