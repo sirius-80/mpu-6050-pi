@@ -117,5 +117,6 @@ while True:
         # client.publish('accelx', str(accelleration_xout_scale))
         # client.publish('accely', str(accelleration_yout_scale))
         # client.publish('accelz', str(accelleration_zout_scale))
+        time.sleep(0.05)
     except IOError:
         time.sleep(0.1)

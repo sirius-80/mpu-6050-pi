@@ -56,7 +56,6 @@
                 if (dpsX.length > dataLength) {
                     dpsX.shift();
                 }
-                chartX.render();
             };
             var updateAccelY = function (count, accel) {
                 dpsY.push({
@@ -66,7 +65,6 @@
                 if (dpsY.length > dataLength) {
                     dpsY.shift();
                 }
-                chartY.render();
             };
             var updateAccelZ = function (count, accel) {
                 dpsZ.push({
@@ -76,13 +74,13 @@
                 if (dpsZ.length > dataLength) {
                     dpsZ.shift();
                 }
-                chartZ.render();
             };
-            var updateCharts() {
+
+            var updateCharts = function() {
                 chartX.render();
                 chartY.render();
                 chartZ.render();
-            }
+            };
 
             /* Initialize MQTT */
             var wsbroker = "localhost";//location.hostname;
@@ -102,6 +100,7 @@
                 updateAccelY(msgCount, accel_y);
                 updateAccelZ(msgCount, accel_z);
                 updateCharts();
+                msgCount++;
                 // var accel =  parseFloat(message.payloadString);
                 // switch (message.destinationName) {
                 //     case "accelx":
@@ -129,9 +128,9 @@
             var options = {
                 onSuccess: function () {
                     console.log("CONNECTION SUCCESS");
-                    client.subscribe('accelx');
-                    client.subscribe('accely');
-                    client.subscribe('accelz');
+                    client.subscribe('accel');
+                    // client.subscribe('accely');
+                    // client.subscribe('accelz');
                 },
                 onFailure: function (message) {
                     console.log("CONNECTION FAILURE - " + message.errorMessage);
