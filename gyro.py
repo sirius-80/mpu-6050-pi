@@ -2,7 +2,7 @@
 import smbus
 import math
 import time
-import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
 
 MQTT_SERVER = "192.168.178.65"
 
@@ -61,22 +61,21 @@ def get_rotations():
     return (rotation_x, rotation_y)
 
 
+print("gyro")
+print("--------")
 
-print "gyro"
-print "--------"
- 
 gyro_xout = read_word_2c(0x43)
 gyro_yout = read_word_2c(0x45)
 gyro_zout = read_word_2c(0x47)
- 
-print "gyro_xout: ", ("%5d" % gyro_xout), " scale: ", (gyro_xout / 131.0)
-print "gyro_yout: ", ("%5d" % gyro_yout), " scale: ", (gyro_yout / 131.0)
-print "gyro_zout: ", ("%5d" % gyro_zout), " scale: ", (gyro_zout / 131.0)
- 
-print
-print "accellerationssensor"
-print "---------------------"
- 
+
+print("gyro_xout: ", ("%5d" % gyro_xout), " scale: ", (gyro_xout / 131.0))
+print("gyro_yout: ", ("%5d" % gyro_yout), " scale: ", (gyro_yout / 131.0))
+print("gyro_zout: ", ("%5d" % gyro_zout), " scale: ", (gyro_zout / 131.0))
+
+print()
+print("accellerationssensor")
+print("---------------------")
+
 accelleration_xout = read_word_2c(0x3b)
 accelleration_yout = read_word_2c(0x3d)
 accelleration_zout = read_word_2c(0x3f)
@@ -84,14 +83,16 @@ accelleration_zout = read_word_2c(0x3f)
 accelleration_xout_scale = accelleration_xout / 16384.0
 accelleration_yout_scale = accelleration_yout / 16384.0
 accelleration_zout_scale = accelleration_zout / 16384.0
- 
-print "accelleration_xout: ", ("%6d" % accelleration_xout), " scale: ", accelleration_xout_scale
-print "accelleration_yout: ", ("%6d" % accelleration_yout), " scale: ", accelleration_yout_scale
-print "accelleration_zout: ", ("%6d" % accelleration_zout), " scale: ", accelleration_zout_scale
- 
-print "X Rotation: " , get_x_rotation(accelleration_xout_scale, accelleration_yout_scale, accelleration_zout_scale)
-print "Y Rotation: " , get_y_rotation(accelleration_xout_scale, accelleration_yout_scale, accelleration_zout_scale)
 
+print("accelleration_xout: ", ("%6d" % accelleration_xout), " scale: ", accelleration_xout_scale)
+print("accelleration_yout: ", ("%6d" % accelleration_yout), " scale: ", accelleration_yout_scale)
+print("accelleration_zout: ", ("%6d" % accelleration_zout), " scale: ", accelleration_zout_scale)
+
+print("X Rotation: ", get_x_rotation(accelleration_xout_scale, accelleration_yout_scale, accelleration_zout_scale))
+print("Y Rotation: ", get_y_rotation(accelleration_xout_scale, accelleration_yout_scale, accelleration_zout_scale))
+
+client = mqtt.Client()
+client.connect(MQTT_SERVER)
 
 vx = vy = vz = 0
 while True:
@@ -110,10 +111,10 @@ while True:
         vy += accelleration_yout_scale
         vz += accelleration_zout_scale
         print("V = (%f, %f, %f)" % (vx, vy, vz))
-        publish.single('x', str(rotation_x), hostname=MQTT_SERVER)
-        publish.single('y', str(rotation_y), hostname=MQTT_SERVER)
-        publish.single('accelx', str(accelleration_xout_scale), hostname=MQTT_SERVER);
-        publish.single('accely', str(accelleration_yout_scale), hostname=MQTT_SERVER);
-        publish.single('accelz', str(accelleration_zout_scale), hostname=MQTT_SERVER);
+        client.publish('x', str(rotation_x))
+        client.publish('y', str(rotation_y))
+        client.publish('accelx', str(accelleration_xout_scale))
+        client.publish('accely', str(accelleration_yout_scale))
+        client.publish('accelz', str(accelleration_zout_scale))
     except IOError:
         time.sleep(0.1)
