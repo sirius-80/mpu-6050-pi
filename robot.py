@@ -26,6 +26,7 @@ class GpioController(object):
         self.pwm_right = None
 
         self.init_ultrasound_module()
+        self.motor_direction = -1 # Set to 1 or -1 depending on how the motors are placed (fwd or reversed)
         self.init_motor_controls()
 
     def init_ultrasound_module(self):
@@ -79,18 +80,18 @@ class GpioController(object):
     def left_wheel(self, speed):
         if speed > 0:
             self.pwm_left_bck.ChangeDutyCycle(0)
-            self.pwm_left_fwd.ChangeDutyCycle(speed)
+            self.pwm_left_fwd.ChangeDutyCycle(self.motor_direction * speed)
         else:
             self.pwm_left_fwd.ChangeDutyCycle(0)
-            self.pwm_left_bck.ChangeDutyCycle(-speed)
+            self.pwm_left_bck.ChangeDutyCycle(-self.motor_direction * speed)
 
     def right_wheel(self, speed):
         if speed > 0:
             self.pwm_right_bck.ChangeDutyCycle(0)
-            self.pwm_right_fwd.ChangeDutyCycle(speed)
+            self.pwm_right_fwd.ChangeDutyCycle(self.motor_direction * speed)
         else:
             self.pwm_right_fwd.ChangeDutyCycle(0)
-            self.pwm_right_bck.ChangeDutyCycle(-speed)
+            self.pwm_right_bck.ChangeDutyCycle(-self.motor_direction * speed)
 
     def close(self):
         self.pwm_left_fwd.stop()
