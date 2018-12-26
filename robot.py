@@ -202,8 +202,8 @@ def main():
         left = 0
         right = 0
         EPSILON_MOTION = .1
-        EPSILON_Y = .2
-        if y > EPSILON_Y:
+        EPSILON_Y = .5
+        if abs(y) > EPSILON_Y:
             d = numpy.sign(y)
         else:
             d = 1
