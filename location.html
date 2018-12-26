@@ -82,7 +82,6 @@
     function add_controls() {
         controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableZoom = true;
-        controls.maxPolarAngle = Math.PI / 2;
     }
 
     function add_stats() {
@@ -104,9 +103,6 @@
 
     function addPoint(x, y) {
         var positions = lineGeometry.attributes.position.array;
-
-        // var x = Math.round(Math.random() * 100);
-        // var y = Math.round(Math.random() * 100);
         var z = 10;
 
         positions[nrOfPoints * 3 + 0] = x;
@@ -150,6 +146,20 @@
         client.connect(options);
     }
 
+    function startLinePath() {
+        lineGeometry = new THREE.BufferGeometry();
+        var positions = new Float32Array(MAX_POINTS * 3);
+        positions[nrOfPoints + 0] = 0; //x
+        positions[nrOfPoints + 1] = 0; // y
+        positions[nrOfPoints + 2] = 10; // z
+        nrOfPoints = 1;
+        lineGeometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+        lineGeometry.setDrawRange(0, nrOfPoints);
+        material = new THREE.LineBasicMaterial({color: 0x0000ff, linewidth: 2});
+        var line = new THREE.Line(lineGeometry, material);
+        scene.add(line);
+    }
+
     function init() {
         initMQTT();
 
@@ -162,18 +172,7 @@
         add_controls();
         add_stats();
 
-        // lineGeometry = new THREE.Geometry();
-        lineGeometry = new THREE.BufferGeometry();
-        var positions = new Float32Array(MAX_POINTS * 3);
-        positions[nrOfPoints + 0] = 0; //x
-        positions[nrOfPoints + 1] = 0; // y
-        positions[nrOfPoints + 2] = 10; // z
-        nrOfPoints = 1;
-        lineGeometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-        lineGeometry.setDrawRange(0, nrOfPoints);
-        material = new THREE.LineBasicMaterial({color: 0x0000ff, linewidth: 2});
-        var line = new THREE.Line(lineGeometry, material);
-        scene.add(line);
+        startLinePath();
 
         window.addEventListener( 'resize', onWindowResize, false );
     }
