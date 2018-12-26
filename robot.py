@@ -20,8 +20,6 @@ class GpioController(object):
         GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Button to GPIO23
         GPIO.setup(24, GPIO.OUT)  # LED to GPIO24
 
-        self.blinking = None
-        self.executor = None
         self.GPIO_TRIGGER = 18
         self.GPIO_ECHO = 17
         self.pwm_left = None
@@ -204,7 +202,7 @@ def main():
         left = 0
         right = 0
         EPSILON_MOTION = .1
-        EPSILON_Y = .5
+        EPSILON_Y = .2
         if y > EPSILON_Y:
             d = numpy.sign(y)
         else:
