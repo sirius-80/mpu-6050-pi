@@ -184,8 +184,8 @@ class Tracker:
     def update_location(self):
         buf = self.mouse_fd.read(3);
         dx, dy = struct.unpack("bb", buf[1:])
-        self.location[0] += dx
-        self.location[1] += dy
+        self.location[0] += dx/1000.0
+        self.location[1] += dy/1000.0
         return self.location
 
 
