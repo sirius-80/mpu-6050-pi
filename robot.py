@@ -1,11 +1,15 @@
 #!/usr/bin/env python
+import struct
 
 import cwiid
 import logging
 import numpy
 import RPi.GPIO as GPIO
 import time
-import concurrent.futures
+import paho.mqtt.client as mqtt
+
+
+MQTT_SERVER = "192.168.178.65"
 
 
 class GpioController(object):
@@ -23,16 +27,8 @@ class GpioController(object):
         self.pwm_left = None
         self.pwm_right = None
 
-        self.init_led_and_button()
         self.init_ultrasound_module()
         self.init_motor_controls()
-
-    def init_led_and_button(self):
-        self.blinking = False
-        self.executor = concurrent.futures.ThreadPoolExecutor(4)
-        GPIO.add_event_detect(23, GPIO.RISING)
-        GPIO.add_event_callback(23, self.led_blinking_fast)
-        GPIO.setmode(GPIO.BCM)
 
     def init_ultrasound_module(self):
         # set GPIO Pins for ultra-sound TX module
@@ -53,34 +49,6 @@ class GpioController(object):
         self.pwm_left_bck.start(0)
         self.pwm_right_fwd.start(0)
         self.pwm_right_bck.start(0)
-
-    def led_blinking_fast(self, channel):
-        self.led_blinking(10)
-
-    def led_blinking(self, frequency_hz=3):
-        if self.blinking:
-            task = self.blinking
-            self.blinking = False
-            task.result()
-
-        def do_blink():
-            while self.blinking:
-                self._led(True)
-                time.sleep(0.5/frequency_hz)
-                self._led(False)
-                time.sleep(0.5/frequency_hz)
-
-        self.blinking = self.executor.submit(do_blink)
-
-    def led(self, on_off):
-        self.blinking = False
-        self._led(on_off)
-
-    def _led(self, on_off):
-        """Turn led (connected to pin 24) <on_off>"""
-        signal = on_off and GPIO.HIGH or GPIO.LOW
-        GPIO.output(24, signal)
-        logging.debug("LED %s", on_off and "on" or "off")
 
     def distance(self):
         """Measures and returns current distance in m."""
@@ -127,7 +95,6 @@ class GpioController(object):
             self.pwm_right_bck.ChangeDutyCycle(-speed)
 
     def close(self):
-        self.led(False)
         self.pwm_left_fwd.stop()
         self.pwm_left_bck.stop()
         self.pwm_right_fwd.stop()
@@ -158,7 +125,7 @@ class WiimoteControl(object):
         self.direction_callback_function = func
 
     def _connect(self):
-        logging.warn('Press button 1 + 2 on your Wii Remote...')
+        logging.warning('Press button 1 + 2 on your Wii Remote...')
         self.wiimote = None
         self._connected = False
         while not self.wiimote:
@@ -169,9 +136,9 @@ class WiimoteControl(object):
                 logging.info('Press the HOME button to disconnect the Wii and end the application')
                 self.rumble()
             except RuntimeError:
-                logging.warn("Timed out waiting for wii-remote, trying again...")
+                logging.warning("Timed out waiting for wii-remote, trying again...")
             except KeyboardInterrupt:
-                logging.warn("Interrupted. Stopping.")
+                logging.warning("Interrupted. Stopping.")
 
     def _wii_msg_callback(self, mesg_list, time):
         for mesg in mesg_list:
@@ -209,37 +176,51 @@ class WiimoteControl(object):
         self._connected = False
 
 
+class Tracker:
+    def __init__(self):
+        self.location = (0, 0)
+        self.mouse_fd = open("/dev/input/mice", "rb")
+
+    def update_location(self):
+        buf = self.mouse_fd.read(3);
+        update = struct.unpack("bb", buf[1:])
+        self.location[0] += update[0]
+        self.location[1] += update[1]
+        return self.location
+
+
 def main():
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s - %(message)s')
-    wii_controller = WiimoteControl()
     board_controller = GpioController()
-
+    location_tracker = Tracker()
+    client = mqtt.Client()
+    client.connect(MQTT_SERVER)
+    wii_controller = WiimoteControl()
     wii_controller.on_button(cwiid.BTN_HOME, wii_controller.close)
-    wii_controller.on_button(cwiid.BTN_PLUS, board_controller.led, True)
-    wii_controller.on_button(cwiid.BTN_MINUS, board_controller.led, False)
-    wii_controller.on_button(cwiid.BTN_A, board_controller.led_blinking)
-    wii_controller.on_button(cwiid.BTN_1, board_controller.led_blinking, 1.0)
-    wii_controller.on_button(cwiid.BTN_2, board_controller.led_blinking, 2.0)
 
-    def wheels(direction):
+    def control_wheels(direction):
         (x, y) = direction
         left = 0
         right = 0
-        EPSILON = .1
-        d = numpy.sign(y)
-        if numpy.linalg.norm(direction) > EPSILON:
-            if abs(y) < EPSILON:
+        EPSILON_MOTION = .1
+        EPSILON_Y = .5
+        if y > EPSILON_Y:
+            d = numpy.sign(y)
+        else:
+            d = 1
+        if numpy.linalg.norm(direction) > EPSILON_MOTION:
+            if abs(y) < EPSILON_Y:
                 # Turn in place
                 left = -x
                 right = x
             elif x > 0:
                 # right
-                left = d * abs(y)
-                right = d * numpy.linalg.norm((x, y))
-            else:  # x > 0:
+                left = abs(y) * d
+                right = numpy.linalg.norm((x, y)) * d
+            else:
                 # left
-                left = d * numpy.linalg.norm((x, y))
-                right = d * abs(y)
+                left = numpy.linalg.norm((x, y)) * d
+                right = abs(y) * d
 
         left = 100 * left
         right = 100 * right
@@ -249,28 +230,18 @@ def main():
         board_controller.left_wheel(left)
         board_controller.right_wheel(right)
 
-    wii_controller.on_direction(wheels)
+    wii_controller.on_direction(control_wheels)
 
     try:
         while wii_controller.connected():
             time.sleep(.1)
             free_space = board_controller.distance()
-            logging.debug("Distance: %f", free_space)
-            if free_space < .1:
-                board_controller.led_blinking(10)
-            elif free_space < .2:
-                board_controller.led_blinking(5)
-            elif free_space < .3:
-                board_controller.led_blinking(3)
-            elif free_space < .5:
-                board_controller.led_blinking(2)
-            elif free_space < 1.0:
-                board_controller.led_blinking(1)
-            else:
-                board_controller.led(False)
-
+            location = location_tracker.update_location()
+            logging.debug("At (%d,%d). Free distance: %f", location[0], location[1], free_space)
+            client.publish('location', "%d,%d" % location)
+            client.publish('free_space', str(free_space))
     except KeyboardInterrupt:
-        logging.info("Shutdown")
+        logging.warning("Shutdown")
     finally:
         board_controller.close()
         wii_controller.close()

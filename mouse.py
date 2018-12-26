@@ -1,6 +1,14 @@
 import struct, os
+import paho.mqtt.client as mqtt
+
+
+MQTT_SERVER = "192.168.178.65"
 
 fd = open("/dev/input/mice", "rb")
+
+client = mqtt.Client()
+client.connect(MQTT_SERVER)
+
 
 location_x = 0
 location_y = 0
@@ -22,6 +30,8 @@ while True:
     update = get_mouse_event()
     location_x += update.x
     location_y += update.y
-    print("%d, %d" % (location_x, location_y))
+    print("(%d, %d) -> (%d, %d)" % (update.x, update.y, location_x, location_y))
+    client.publish('location', "%d,%d" % (location_x, location_y))
+
 
 fd.close()
