@@ -78,7 +78,7 @@ class GpioController(object):
         return distance
 
     def left_wheel(self, speed):
-        if speed > 0:
+        if speed * self.motor_direction > 0:
             self.pwm_left_bck.ChangeDutyCycle(0)
             self.pwm_left_fwd.ChangeDutyCycle(self.motor_direction * speed)
         else:
@@ -86,7 +86,7 @@ class GpioController(object):
             self.pwm_left_bck.ChangeDutyCycle(-self.motor_direction * speed)
 
     def right_wheel(self, speed):
-        if speed > 0:
+        if speed * self.motor_direction > 0:
             self.pwm_right_bck.ChangeDutyCycle(0)
             self.pwm_right_fwd.ChangeDutyCycle(self.motor_direction * speed)
         else:
