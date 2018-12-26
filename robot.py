@@ -180,12 +180,13 @@ class Tracker:
     def __init__(self):
         self.location = [0, 0]
         self.mouse_fd = open("/dev/input/mice", "rb")
+        self.scale = 0.04 # TODO: Determine correct scale!
 
     def update_location(self):
         buf = self.mouse_fd.read(3);
         dx, dy = struct.unpack("bb", buf[1:])
-        self.location[0] += dx/1000.0
-        self.location[1] += dy/1000.0
+        self.location[0] += dx * self.scale
+        self.location[1] += dy * self.scale
         return self.location
 
 
