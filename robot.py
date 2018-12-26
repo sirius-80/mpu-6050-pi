@@ -178,7 +178,7 @@ class WiimoteControl(object):
 
 class Tracker:
     def __init__(self):
-        self.location = (0, 0)
+        self.location = [0, 0]
         self.mouse_fd = open("/dev/input/mice", "rb")
 
     def update_location(self):
@@ -238,7 +238,7 @@ def main():
             free_space = board_controller.distance()
             location = location_tracker.update_location()
             logging.debug("At (%d,%d). Free distance: %f", location[0], location[1], free_space)
-            client.publish('location', "%d,%d" % location)
+            client.publish('location', "%d,%d" % (location[0], location[1]))
             client.publish('free_space', str(free_space))
     except KeyboardInterrupt:
         logging.warning("Shutdown")
