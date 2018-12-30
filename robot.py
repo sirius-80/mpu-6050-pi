@@ -179,7 +179,7 @@ class Tracker:
     def __init__(self):
         self.location = [0, 0]
         self.mouse_fd = open("/dev/input/mice", "rb")
-        self.scale = 0.04 # TODO: Determine correct scale!
+        self.scale = 1 # TODO: Determine correct scale!
 
     def update_location(self):
         buf = self.mouse_fd.read(3);
