@@ -1,9 +1,12 @@
 #!/usr/bin/env python
+from apds9960.const import *
+from apds9960 import APDS9960
 import struct
 import cwiid
 import logging
 import numpy
 import RPi.GPIO as GPIO
+import smbus
 import time
 import paho.mqtt.client as mqtt
 
@@ -27,6 +30,18 @@ class GpioController(object):
         self.init_ultrasound_module()
         self.motor_direction = -1 # Set to 1 or -1 depending on how the motors are placed (fwd or reversed)
         self.init_motor_controls()
+        self.init_apds9960()
+
+    def _interrupt_handler(self):
+        pass
+
+    def init_apds9960(self):
+        port = 1
+        bus = smbus.SMBus(port)
+        self.apds = APDS9960(bus)
+        GPIO.setup(4, GPIO.IN)
+        GPIO.add_event_detect(4, GPIO.FALLING, callback = self._interrupt_handler)
+        self.apds.enableGestureSensor()
 
     def init_ultrasound_module(self):
         # set GPIO Pins for ultra-sound TX module
@@ -179,6 +194,14 @@ class Tracker:
         self.location = [0, 0]
         self.mouse_fd = open("/dev/input/mice", "rb")
         self.scale = 1 # TODO: Determine correct scale!
+        self.start_location = self.location
+
+    def reset(self):
+        self.start_location = self.location
+
+    def distance(self):
+        return math.sqrt(math.pow(self.location[0]-self.start_location[0],2) + \
+                         math.pow(self.location[1]-self.start_location[1],2))
 
     def update_location(self):
         buf = self.mouse_fd.read(3);
@@ -192,8 +215,8 @@ def main():
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s - %(message)s')
     board_controller = GpioController()
     location_tracker = Tracker()
-    client = mqtt.Client()
-    client.connect(MQTT_SERVER)
+    #client = mqtt.Client()
+    #client.connect(MQTT_SERVER)
     wii_controller = WiimoteControl()
     wii_controller.on_button(cwiid.BTN_HOME, wii_controller.close)
 
@@ -231,14 +254,30 @@ def main():
 
     wii_controller.on_direction(control_wheels)
 
+    directions = {
+        APDS9960_DIR_NONE: None,
+        APDS9960_DIR_LEFT: "left",
+        APDS9960_DIR_RIGHT: "right",
+        APDS9960_DIR_UP: "forward",
+        APDS9960_DIR_DOWN: "backward",
+        APDS9960_DIR_NEAR: None,
+        APDS9960_DIR_FAR: None,
+    }
+    direction = None
     try:
         while wii_controller.connected():
             time.sleep(.1)
             free_space = board_controller.distance()
             location = location_tracker.update_location()
+            if self.apds.isGestureAvailable():
+                direction = directions[apds.readGesture()]
+            if location_tracker.distance >= 0.5:
+                # Stop moving after certain time
+                direction = None
+                location_tracker.reset()
             logging.debug("At (%d,%d). Free distance: %f", location[0], location[1], free_space)
-            client.publish('location', "%d,%d" % (location[0], location[1]))
-            client.publish('free_space', str(free_space))
+            #client.publish('location', "%d,%d" % (location[0], location[1]))
+            #client.publish('free_space', str(free_space))
     except KeyboardInterrupt:
         logging.warning("Shutdown")
     finally:
