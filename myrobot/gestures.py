@@ -17,10 +17,10 @@ class GestureReceiver(object):
         GPIO.setwarnings(False)
         port = 1
         bus = smbus.SMBus(port)
-        apds = apds9960.APDS9960(bus)
+        self.apds = apds9960.APDS9960(bus)
         GPIO.setup(4, GPIO.IN)
         GPIO.add_event_detect(4, GPIO.FALLING, callback=self._gesture_handler)
-        apds.enableGestureSensor()
+        self.apds.enableGestureSensor()
 
     def _gesture_handler(self, channel):
         directions = {
@@ -34,7 +34,7 @@ class GestureReceiver(object):
         }
         direction = directions[self.apds.readGesture()]
         if direction:
-            logging.info("Received gesture: %s" % direction)
+            logging.info("Received gesture: %s on channel %s" % (direction, str(channel)))
             self.queue.put(direction)
 
     def close(self):
