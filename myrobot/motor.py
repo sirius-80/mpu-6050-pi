@@ -37,7 +37,7 @@ class Motor(object):
         self.pwm_left_fwd.ChangeDutyCycle(100)
         self.pwm_right_bck.ChangeDutyCycle(100)
         self.pwm_right_fwd.ChangeDutyCycle(0)
-        time.sleep(1.0)
+        time.sleep(0.85)
         self.pwm_left_fwd.ChangeDutyCycle(0)
         self.pwm_right_bck.ChangeDutyCycle(0)
 
@@ -46,7 +46,7 @@ class Motor(object):
         self.pwm_left_fwd.ChangeDutyCycle(0)
         self.pwm_right_bck.ChangeDutyCycle(0)
         self.pwm_right_fwd.ChangeDutyCycle(100)
-        time.sleep(1.0)
+        time.sleep(0.85)
         self.pwm_left_bck.ChangeDutyCycle(0)
         self.pwm_right_fwd.ChangeDutyCycle(0)
 
