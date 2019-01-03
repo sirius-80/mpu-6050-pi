@@ -22,7 +22,7 @@ class GestureReceiver(object):
         GPIO.add_event_detect(4, GPIO.FALLING, callback=self._gesture_handler)
         apds.enableGestureSensor()
 
-    def _gesture_handler(self):
+    def _gesture_handler(self, channel):
         directions = {
             apds9960.const.APDS9960_DIR_NONE: None,
             apds9960.const.APDS9960_DIR_LEFT: "left",

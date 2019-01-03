@@ -4,6 +4,7 @@ Building a smart robot using a raspberrypi and cheap components.
 # Prerequisites
 ## For I2C (APDS-9960, MPU-6050)
 sudo apt-get install i2c-tools python-smbus
+pip3 install apds9960
 
 ## For scheduling tasks at fixed rate
 pip3 install apscheduler
