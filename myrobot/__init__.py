@@ -25,6 +25,7 @@ class Robot:
 
     def _process_queue(self):
         while self.running:
+            logging.info("Waiting for command...")
             command = self.command_queue.get()
             logging.info("Processing command: [%s]" % (command, ))
             if command == "forward":
