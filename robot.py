@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import cmd
+
 from apds9960.const import *
 from apds9960 import APDS9960
 import struct
@@ -9,7 +11,10 @@ import RPi.GPIO as GPIO
 import smbus
 import time
 import paho.mqtt.client as mqtt
+import multiprocessing.queues
+import multiprocessing.synchronize
 
+import myrobot
 
 MQTT_SERVER = "192.168.178.65"
 
@@ -21,13 +26,14 @@ MQTT_SERVER = "192.168.178.65"
 #
 #####
 
+
 class GpioController(object):
-    def __init__(self):
-        # GPIO Mode (BOARD / BCM)
-        GPIO.setmode(GPIO.BCM)
+    def __init__(self, cmd_queue):
+        self.cmd_queue = cmd_queue
+        GPIO.setmode(GPIO.BCM) # Use broadcom pin numbering
         GPIO.setwarnings(False)
-        GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Button to GPIO23
-        GPIO.setup(24, GPIO.OUT)  # LED to GPIO24
+        # GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Button to GPIO23
+        # GPIO.setup(24, GPIO.OUT)  # LED to GPIO24
 
         self.GPIO_TRIGGER = 18
         self.GPIO_ECHO = 17
@@ -37,18 +43,31 @@ class GpioController(object):
         self.init_ultrasound_module()
         self.motor_direction = -1 # Set to 1 or -1 depending on how the motors are placed (fwd or reversed)
         self.init_motor_controls()
-        self.init_apds9960()
+        self.apds = self.init_apds9960()
 
-    def _interrupt_handler(self):
-        pass
+    def _gesture_handler(self):
+        directions = {
+            APDS9960_DIR_NONE: None,
+            APDS9960_DIR_LEFT: "left",
+            APDS9960_DIR_RIGHT: "right",
+            APDS9960_DIR_UP: "forward",
+            APDS9960_DIR_DOWN: "backward",
+            APDS9960_DIR_NEAR: None,
+            APDS9960_DIR_FAR: None,
+        }
+        direction = directions[self.apds.readGesture()]
+        if direction:
+            logging.info("Received gesture: %s" % direction)
+            self.cmd_queue.put(direction)
 
     def init_apds9960(self):
         port = 1
         bus = smbus.SMBus(port)
-        self.apds = APDS9960(bus)
+        apds = APDS9960(bus)
         GPIO.setup(4, GPIO.IN)
-        GPIO.add_event_detect(4, GPIO.FALLING, callback = self._interrupt_handler)
-        self.apds.enableGestureSensor()
+        GPIO.add_event_detect(4, GPIO.FALLING, callback=self._gesture_handler)
+        apds.enableGestureSensor()
+        return apds
 
     def init_ultrasound_module(self):
         # set GPIO Pins for ultra-sound TX module
@@ -196,32 +215,11 @@ class WiimoteControl(object):
         self._connected = False
 
 
-class Tracker:
-    def __init__(self):
-        self.location = [0, 0]
-        self.mouse_fd = open("/dev/input/mice", "rb")
-        self.scale = 0.001958033
-        self.start_location = self.location
-
-    def reset(self):
-        self.start_location = self.location
-
-    def distance(self):
-        return math.sqrt(math.pow(self.location[0]-self.start_location[0],2) + \
-                         math.pow(self.location[1]-self.start_location[1],2))
-
-    def update_location(self):
-        buf = self.mouse_fd.read(3);
-        dx, dy = struct.unpack("bb", buf[1:])
-        self.location[0] += dx * self.scale
-        self.location[1] += dy * self.scale
-        return self.location
-
-
 def main():
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s - %(message)s')
-    board_controller = GpioController()
-    location_tracker = Tracker()
+    queue = multiprocessing.queues.SimpleQueue()
+    board_controller = GpioController(queue)
+    location_tracker = myrobot.tracker.Tracker()
     #client = mqtt.Client()
     #client.connect(MQTT_SERVER)
     wii_controller = WiimoteControl()
