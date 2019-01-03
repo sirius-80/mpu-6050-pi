@@ -40,3 +40,5 @@ class Robot:
                 self.motor.turn_left()
             elif command == "right":
                 self.motor.turn_right()
+        self.tracker.stop()
+        self.motor.stop()
