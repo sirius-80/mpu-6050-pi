@@ -14,6 +14,13 @@ import paho.mqtt.client as mqtt
 MQTT_SERVER = "192.168.178.65"
 
 
+#####
+#
+# TODO: Determine front-facing direction of the robot (orientation). This is required for the tracker to work
+#       (otherwise it things it's always moving perpendicular to the y-axis!!)
+#
+#####
+
 class GpioController(object):
     def __init__(self):
         # GPIO Mode (BOARD / BCM)
@@ -193,7 +200,7 @@ class Tracker:
     def __init__(self):
         self.location = [0, 0]
         self.mouse_fd = open("/dev/input/mice", "rb")
-        self.scale = 1 # TODO: Determine correct scale!
+        self.scale = 0.001958033
         self.start_location = self.location
 
     def reset(self):
@@ -266,7 +273,6 @@ def main():
     direction = None
     try:
         while wii_controller.connected():
-            time.sleep(.1)
             free_space = board_controller.distance()
             location = location_tracker.update_location()
             if self.apds.isGestureAvailable():

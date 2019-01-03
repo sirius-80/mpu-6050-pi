@@ -26,6 +26,7 @@
     var container, stats;
     var camera, scene, raycaster, renderer, parentTransform, sphereInter, controls, lineGeometry, material;
     var MAX_POINTS = 10000;
+    var robot_x, robot_y;
     var nrOfPoints = 0;
     var mouse = new THREE.Vector2();
     var radius = 100, theta = 0;
@@ -102,6 +103,8 @@
     }
 
     function addPoint(x, y) {
+        robot_x = x;
+        robot_y = y;
         var positions = lineGeometry.attributes.position.array;
         var z = 10;
 
