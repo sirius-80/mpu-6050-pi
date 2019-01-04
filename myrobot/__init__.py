@@ -52,8 +52,7 @@ class Robot(threading.Thread):
                     time.sleep(0.1)
                 self.motor.stop()
                 logging.info("Traveled %.2f , backward.]" % (self.tracker.get_distance(), ))
-
-        elif command == "left":
+            elif command == "left":
                 self.motor.turn_left()
             elif command == "right":
                 self.motor.turn_right()
