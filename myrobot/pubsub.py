@@ -12,7 +12,7 @@ class PubSubClient:
 
     def send_location(self, x, y):
         """Publishes location."""
-        self.client.publish('location', "%d,%d" % (x, y))
+        self.client.publish('location', "%f,%f" % (x, y))
 
     def send_free_space(self, distance):
         """Publishes free-space (as measured by e.g. sonar)."""
