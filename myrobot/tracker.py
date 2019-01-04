@@ -9,9 +9,9 @@ class Tracker:
     """
     def __init__(self, pubsub_client=None):
         self.pubsub_client = pubsub_client
-        self.location = [0.0, 0.0]
+        self.location = (0.0, 0.0)
         self.mouse_fd = open("/dev/input/mice", "rb")
-        self.scale = 0.0001958033
+        self.scale = 0.00001958033
         self.start_location = self.location
         self.distance = 0.0
         self.running = False
@@ -51,4 +51,4 @@ class Tracker:
             self.distance += math.sqrt(dx*dx + dy*dy)
 
             self.pubsub_client.send_location(*self.location)
-            logging.debug("Location update. Now at (%.02f, %.02f)" % self.location)
+            logging.debug("Location update. Now at (%.02f, %.02f)" % self.location[0])
