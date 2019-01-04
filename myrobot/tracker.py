@@ -7,13 +7,14 @@ import threading
 class Tracker:
     """Location tracker. Once started will update its location every second.
     """
-    def __init__(self, update_frequency=10.0):
+    def __init__(self, pubsub_client=None, update_frequency=10.0):
+        self.pubsub_client = pubsub_client
+        self.update_frequency = update_frequency
         self.location = [0, 0]
         self.mouse_fd = open("/dev/input/mice", "rb")
         self.scale = 0.0001958033
         self.start_location = self.location
         self.distance = 0
-        self.update_frequency = update_frequency
         self.running = False
         self._thread = threading.Thread(target=self._update_location)
 
@@ -52,6 +53,8 @@ class Tracker:
             self.location[0] += dx
             self.location[1] += dy
             self.distance += math.sqrt(dx*dx + dy*dy)
+
+            self.pubsub_client.send_location(*self.location)
 
             # Determine next sleep period
             remaining_cycle_time = cycle_time - (time.monotonic() - start)

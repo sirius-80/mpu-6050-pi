@@ -6,6 +6,7 @@ import myrobot.motor
 import myrobot.tracker
 import myrobot.gestures
 import myrobot.distance
+import myrobot.pubsub
 
 
 class Robot(threading.Thread):
@@ -15,9 +16,10 @@ class Robot(threading.Thread):
         threading.Thread.__init__(self)
         self.command_queue = queue.Queue(1)
         self.motor = myrobot.motor.Motor()
-        self.tracker = myrobot.tracker.Tracker()
+        pubsub = myrobot.pubsub.PubSubClient()
+        self.tracker = myrobot.tracker.Tracker(pubsub)
         self.gestures = myrobot.gestures.GestureReceiver(self.command_queue)
-        self.distance_device = myrobot.distance.DistanceDevice()
+        self.distance_device = myrobot.distance.DistanceDevice(pubsub)
         self.running = False
         self.emergency = False
         self.distance_device.set_action_on_min_distance(self.emergency_break, 0.10)  # Emergency break at 0.10 m.

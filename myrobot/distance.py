@@ -10,7 +10,9 @@ except ModuleNotFoundError:
 
 
 class DistanceDevice:
-    def __init__(self, update_frequency=2.0):
+    def __init__(self, pubsub_client=None, update_frequency=2.0):
+        self.pubsub_client = pubsub_client
+        self.update_frequency = update_frequency
         GPIO.setmode(GPIO.BCM)  # Use broadcom pin numbering
         GPIO.setwarnings(False)
         self.GPIO_TRIGGER = 18
@@ -20,7 +22,6 @@ class DistanceDevice:
         GPIO.setup(self.GPIO_ECHO, GPIO.IN)
         self.distance = None
         self.running = False
-        self.update_frequency = update_frequency
         self._thread = threading.Thread(target=self.run)
         self.min_distance_callable = (None, None)
 
@@ -38,6 +39,8 @@ class DistanceDevice:
             start = time.monotonic()
 
             self.distance = self.get_distance()
+            self.pubsub_client.send_free_space(self.distance)
+
             min_distance = self.min_distance_callable[0]
             if min_distance is not None and self.distance < min_distance:
                 logging.info("Specified minimum distance (%.02f m) reached (%.02f m)." % (min_distance, self.distance))
