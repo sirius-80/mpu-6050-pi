@@ -8,6 +8,7 @@ def main():
         robot = myrobot.Robot()
         robot.start()
     finally:
+        logging.info("Stopping robot!")
         robot.stop()
 
 

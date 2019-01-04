@@ -48,7 +48,7 @@ class Tracker:
             start = time.monotonic()
 
             buf = self.mouse_fd.read(3)
-            dx, dy = [i * self.scale for i in struct.unpack("bb", buf[1:])]
+            dx, dy = [float(i) * self.scale for i in struct.unpack("bb", buf[1:])]
             self.location[0] += dx
             self.location[1] += dy
             self.distance += math.sqrt(dx*dx + dy*dy)

@@ -30,8 +30,6 @@ class Robot:
     def stop(self):
         self.running = False
         self._thread.join(timeout=5.0)
-        self.tracker.stop()
-        self.distance_device.stop()
 
     def _process_command_queue(self):
         while self.running:
@@ -56,6 +54,10 @@ class Robot:
                 self.motor.turn_left()
             elif command == "right":
                 self.motor.turn_right()
-        self.tracker.stop()
+        logging.info("Stopping all robot parts...")
         self.motor.stop()
+        self.tracker.stop()
+        self.distance_device.stop()
+
         self.motor.close()
+        self.distance_device.close()
