@@ -7,6 +7,10 @@ def main():
     try:
         robot = myrobot.Robot()
         robot.start()
+        robot.join()
+    except KeyboardInterrupt:
+        logging.info("Stopping robot!")
+        robot.stop()
     finally:
         logging.info("Stopping robot!")
         robot.stop()

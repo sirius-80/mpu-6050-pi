@@ -8,7 +8,7 @@ import myrobot.gestures
 import myrobot.distance
 
 
-class Robot:
+class Robot(threading.Thread):
     """Creates a new robot. The robot takes gestures as commands, and uses an internal queue to process the commands
     into motor-commands (i.e. drive, turn)."""
     def __init__(self):
@@ -18,20 +18,19 @@ class Robot:
         self.gestures = myrobot.gestures.GestureReceiver(self.command_queue)
         self.distance_device = myrobot.distance.DistanceDevice()
         self.running = False
-        self._thread = threading.Thread(target=self._process_command_queue)
 
     def start(self):
         """Start all parts of the robot."""
         self.running = True
-        self._thread.start()
         self.tracker.start()
         self.distance_device.start()
+        threading.Thread.start(self)
 
     def stop(self):
         self.running = False
-        self._thread.join(timeout=5.0)
+        threading.Thread.stop(self)
 
-    def _process_command_queue(self):
+    def run(self):
         while self.running:
             logging.info("Waiting for command...")
             command = self.command_queue.get()
