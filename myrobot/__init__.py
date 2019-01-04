@@ -30,6 +30,7 @@ class Robot(threading.Thread):
         threading.Thread.start(self)
 
     def emergency_break(self):
+        logging.warning("Emergency break!")
         self.emergency = True
 
     def stop(self):
