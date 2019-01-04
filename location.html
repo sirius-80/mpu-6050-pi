@@ -130,8 +130,8 @@
         };
         client.onMessageArrived = function (message) {
             var locationStrArr = message.payloadString.split(",");
-            var x = parseFloat(locationStrArr[0]);
-            var y = parseFloat(locationStrArr[1]);
+            var x = 100 * parseFloat(locationStrArr[0]);
+            var y = 100 * parseFloat(locationStrArr[1]);
             addPoint(x, y);
         };
 

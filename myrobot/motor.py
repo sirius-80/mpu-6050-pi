@@ -45,7 +45,7 @@ class Motor(object):
         self.pwm[LEFT][FORWARD].ChangeDutyCycle(100)
         self.pwm[RIGHT][BACKWARD].ChangeDutyCycle(100)
         self.pwm[RIGHT][FORWARD].ChangeDutyCycle(0)
-        time.sleep(0.85)  # This results in (approximately) a 90 degree turn
+        time.sleep(0.97)  # This results in (approximately) a 90 degree turn
         self.pwm[LEFT][FORWARD].ChangeDutyCycle(0)
         self.pwm[RIGHT][BACKWARD].ChangeDutyCycle(0)
 
@@ -55,7 +55,7 @@ class Motor(object):
         self.pwm[LEFT][FORWARD].ChangeDutyCycle(0)
         self.pwm[RIGHT][BACKWARD].ChangeDutyCycle(0)
         self.pwm[RIGHT][FORWARD].ChangeDutyCycle(100)
-        time.sleep(0.85)  # This results in (approximately) a 90 degree turn
+        time.sleep(0.97)  # This results in (approximately) a 90 degree turn
         self.pwm[LEFT][BACKWARD].ChangeDutyCycle(0)
         self.pwm[RIGHT][FORWARD].ChangeDutyCycle(0)
 
