@@ -12,6 +12,7 @@ class Robot(threading.Thread):
     """Creates a new robot. The robot takes gestures as commands, and uses an internal queue to process the commands
     into motor-commands (i.e. drive, turn)."""
     def __init__(self):
+        threading.Thread.__init__(self)
         self.command_queue = queue.Queue(1)
         self.motor = myrobot.motor.Motor()
         self.tracker = myrobot.tracker.Tracker()
@@ -28,7 +29,7 @@ class Robot(threading.Thread):
 
     def stop(self):
         self.running = False
-        threading.Thread.stop(self)
+        self.join(timeout=5.0)
 
     def run(self):
         while self.running:
