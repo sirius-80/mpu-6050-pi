@@ -46,8 +46,8 @@ class Tracker:
         while self.running:
             buf = self.mouse_fd.read(3)
             dx, dy = [float(i) * self.scale for i in struct.unpack("bb", buf[1:])]
-            self.location[0] += dx
-            self.location[1] += dy
+            new_location = (self.location[0] + dx, self.location[1] + dy)
+            self.location = new_location
             self.distance += math.sqrt(dx*dx + dy*dy)
 
             self.pubsub_client.send_location(*self.location)
