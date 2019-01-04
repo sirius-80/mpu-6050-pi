@@ -10,7 +10,7 @@ class Tracker:
     def __init__(self, update_frequency=10.0):
         self.location = [0, 0]
         self.mouse_fd = open("/dev/input/mice", "rb")
-        self.scale = 0.001958033
+        self.scale = 0.0001958033
         self.start_location = self.location
         self.distance = 0
         self.update_frequency = update_frequency
