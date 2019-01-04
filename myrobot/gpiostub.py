@@ -4,6 +4,8 @@ PUD_UP = "PUD_UP"
 PUD_DOWN = "PUD_DOWN"
 IN = "IN"
 OUT = "OUT"
+FALLING = "FALLING"
+RISING = "RISING"
 
 
 def setwarnings(warnings):

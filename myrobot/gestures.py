@@ -1,5 +1,4 @@
 import logging
-
 import apds9960
 import smbus
 try:
