@@ -15,7 +15,7 @@ class Tracker:
         self.mouse_fd = open("/dev/input/mice", "rb")
         self.scale = 0.0001958033
         self.start_location = self.location
-        self.distance = 0
+        self.distance = 0.0
         self.running = False
         self._thread = threading.Thread(target=self._update_location)
 
