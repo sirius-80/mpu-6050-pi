@@ -53,7 +53,7 @@ class Robot(threading.Thread):
             elif command == "backward":
                 self.tracker.reset()
                 self.motor.backward()
-                while not self.emergency and self.tracker.get_distance() < 0.5:
+                while self.tracker.get_distance() < 0.5:
                     logging.debug("Traveling backward: [%.2f / %.2f m.]" % (self.tracker.get_distance(), 0.5))
                     time.sleep(0.1)
                 self.motor.stop()
