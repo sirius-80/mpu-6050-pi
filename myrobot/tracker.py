@@ -10,7 +10,7 @@ class Tracker:
     def __init__(self, pubsub_client=None, update_frequency=10.0):
         self.pubsub_client = pubsub_client
         self.update_frequency = update_frequency
-        self.location = [0, 0]
+        self.location = [0.0, 0.0]
         self.mouse_fd = open("/dev/input/mice", "rb")
         self.scale = 0.0001958033
         self.start_location = self.location
@@ -55,6 +55,7 @@ class Tracker:
             self.distance += math.sqrt(dx*dx + dy*dy)
 
             self.pubsub_client.send_location(*self.location)
+            logging.debug("Location update. Now at (%.02f, %.02f)" % self.location)
 
             # Determine next sleep period
             remaining_cycle_time = cycle_time - (time.monotonic() - start)
