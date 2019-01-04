@@ -40,15 +40,15 @@ class Robot(threading.Thread):
                 self.tracker.reset()
                 self.motor.forward()
                 while self.tracker.get_distance() < 0.5:
-                    time.sleep(0.1)
                     logging.debug("Traveling forward: [%.2f / %.2f m.]" % (self.tracker.get_distance(), 0.5))
+                    time.sleep(0.1)
                 self.motor.stop()
             elif command == "backward":
                 self.tracker.reset()
                 self.motor.backward()
                 while self.tracker.get_distance() < 0.5:
-                    time.sleep(0.1)
                     logging.debug("Traveling backward: [%.2f / %.2f m.]" % (self.tracker.get_distance(), 0.5))
+                    time.sleep(0.1)
                 self.motor.stop()
             elif command == "left":
                 self.motor.turn_left()
