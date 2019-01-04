@@ -51,4 +51,4 @@ class Tracker:
             self.distance += math.sqrt(dx*dx + dy*dy)
 
             self.pubsub_client.send_location(*self.location)
-            logging.debug("Location update. Now at (%.02f, %.02f)" % self.location[0])
+            logging.debug("Location update. Now at (%.02f, %.02f)" % self.location)
