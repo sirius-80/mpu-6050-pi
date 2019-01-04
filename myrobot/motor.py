@@ -45,7 +45,7 @@ class Motor(object):
         self.pwm[LEFT][FORWARD].ChangeDutyCycle(100)
         self.pwm[RIGHT][BACKWARD].ChangeDutyCycle(100)
         self.pwm[RIGHT][FORWARD].ChangeDutyCycle(0)
-        time_left = 0.83
+        time_left = 0.87
         while time_left > 0.01:
             start = time.monotonic()
             time.sleep(0.01)
@@ -59,12 +59,11 @@ class Motor(object):
         self.pwm[LEFT][FORWARD].ChangeDutyCycle(0)
         self.pwm[RIGHT][BACKWARD].ChangeDutyCycle(0)
         self.pwm[RIGHT][FORWARD].ChangeDutyCycle(100)
-        time_left = 0.83
+        time_left = 0.87
         while time_left > 0.01:
             start = time.monotonic()
             time.sleep(0.01)
             time_left -= time.monotonic() - start
-        time.sleep(0.90)  # This results in (approximately) a 90 degree turn
         self.pwm[LEFT][BACKWARD].ChangeDutyCycle(0)
         self.pwm[RIGHT][FORWARD].ChangeDutyCycle(0)
 
