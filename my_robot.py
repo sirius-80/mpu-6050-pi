@@ -11,9 +11,6 @@ def main():
     except KeyboardInterrupt:
         logging.info("Stopping robot!")
         robot.stop()
-    finally:
-        logging.info("Stopping robot!")
-        robot.stop()
 
 
 if __name__ == "__main__":

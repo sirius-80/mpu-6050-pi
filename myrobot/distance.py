@@ -31,7 +31,6 @@ class DistanceDevice:
             start = time.monotonic()
 
             self.distance = self.get_distance()
-            time.sleep(1.0 / self.update_frequency)
 
             # Determine next sleep period
             remaining_cycle_time = cycle_time - (time.monotonic() - start)
