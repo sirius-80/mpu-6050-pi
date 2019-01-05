@@ -82,6 +82,7 @@ class ControlStrategy:
         pass
 
     def interrupt(self):
+        logging.info("%s interrupted!!!" % self.__class__)
         self.interrupted = True
 
     def proceed(self):
