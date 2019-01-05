@@ -30,7 +30,6 @@ class Robot(threading.Thread, DistanceEventListener):
         self.gestures = myrobot.gestures.GestureReceiver(self.command_queue)
         self.distance_device = myrobot.distance.DistanceDevice(self.distance_event, pubsub)
         self.running = False
-        self.emergency = False
         self.strategies = {COMMAND: CommandStrategy(self, self.command_queue),
                            BACKOFF: BackoffStrategy(self)}
         self.control_strategy = self.strategies[COMMAND]
@@ -46,18 +45,15 @@ class Robot(threading.Thread, DistanceEventListener):
         if distance < 0.1:
             if self.control_strategy is not self.strategies[BACKOFF]:
                 logging.warning("STRATEGY -> BACKOFF")
-                self.emergency = True
                 self.control_strategy.interrupt()
                 self.control_strategy = self.strategies[BACKOFF]
+                self.control_strategy.proceed()
         else:
             if self.control_strategy is not self.strategies[COMMAND]:
                 logging.warning("STRATEGY -> COMMAND")
                 self.control_strategy.interrupt()
                 self.control_strategy = self.strategies[COMMAND]
-
-    def emergency_break(self):
-        logging.warning("Emergency break!")
-        self.emergency = True
+                self.control_strategy.proceed()
 
     def stop(self):
         self.running = False
@@ -65,7 +61,6 @@ class Robot(threading.Thread, DistanceEventListener):
 
     def run(self):
         while self.running:
-            self.emergency = False
             self.control_strategy.execute()
             self.motor.stop()
         logging.info("Stopping all robot parts...")
@@ -84,10 +79,13 @@ class ControlStrategy:
 
     def execute(self):
         """Execute single pass of this strategy."""
-        self.interrupted = False
+        pass
 
     def interrupt(self):
         self.interrupted = True
+
+    def proceed(self):
+        self.interrupted = False
 
 
 class BackoffStrategy(ControlStrategy):
@@ -121,7 +119,6 @@ class CommandStrategy(ControlStrategy):
         except Empty:
             return
 
-        self.robot.emergency = False
         logging.info("Processing command: [%s]" % (command, ))
         if command == "forward":
             self.robot.tracker.reset()
