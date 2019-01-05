@@ -113,6 +113,7 @@ class BackoffStrategy(ControlStrategy):
         ControlStrategy.__init__(self, robot)
 
     def execute(self):
+        logging.info("BackoffStrategy::execute()")
         ControlStrategy.execute(self)
         self.robot.motor.backward(50)
         while not self.interrupt and self.robot.distance_device.get_distance() < 0.10:
@@ -129,6 +130,7 @@ class CommandStrategy(ControlStrategy):
         self.interrupt = True
 
     def execute(self):
+        logging.info("CommandStrategy::execute()")
         ControlStrategy.execute(self)
         logging.info("Waiting for command...")
         while self.command_queue.empty():
