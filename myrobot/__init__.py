@@ -33,7 +33,7 @@ class Robot(threading.Thread, DistanceEventListener):
         self.emergency = False
         self.strategies = {COMMAND: CommandStrategy(self, self.command_queue),
                            BACKOFF: BackoffStrategy(self)}
-        self.strategy = self.strategies[COMMAND]
+        self.control_strategy = self.strategies[COMMAND]
 
     def start(self):
         """Start all parts of the robot."""
@@ -43,12 +43,12 @@ class Robot(threading.Thread, DistanceEventListener):
         threading.Thread.start(self)
 
     def distance_event(self, distance):
-        if distance < 0.1 and self.strategy is not self.strategies[BACKOFF]:
+        if distance < 0.1 and self.control_strategy is not self.strategies[BACKOFF]:
             logging.warning("Emergency break!")
             self.emergency = True
-            self.strategy = BackoffStrategy(self)
-        elif self.strategy is not self.strategies[COMMAND]:
-            self.strategy = CommandStrategy(self, self.command_queue)
+            self.control_strategy = BackoffStrategy(self)
+        elif self.control_strategy is not self.strategies[COMMAND]:
+            self.control_strategy = CommandStrategy(self, self.command_queue)
 
     def emergency_break(self):
         logging.warning("Emergency break!")
