@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
 
-DEFAULT_MQTT_SERVER = "erik-Aspire-XC-705"
+# DEFAULT_MQTT_SERVER = "erik-Aspire-XC-705"
+DEFAULT_MQTT_SERVER = "localhost"
 
 
 class PubSubClient:

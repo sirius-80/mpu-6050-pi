@@ -34,7 +34,6 @@ class Robot(threading.Thread, DistanceEventListener):
         self.strategies = {COMMAND: CommandStrategy(self, self.command_queue),
                            BACKOFF: BackoffStrategy(self)}
         self.strategy = self.strategies[COMMAND]
-        self.distance_device.set_action_on_min_distance(self.emergency_break, 0.10)  # Emergency break at 0.10 m.
 
     def start(self):
         """Start all parts of the robot."""
