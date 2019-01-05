@@ -46,10 +46,10 @@ class Robot(threading.Thread, DistanceEventListener):
         if distance < 0.1 and self.control_strategy is not self.strategies[BACKOFF]:
             logging.warning("STRATEGY -> BACKOFF")
             self.emergency = True
-            self.control_strategy = BackoffStrategy(self)
+            self.control_strategy = self.strategies[BACKOFF]
         elif self.control_strategy is not self.strategies[COMMAND]:
             logging.warning("STRATEGY -> COMMAND")
-            self.control_strategy = CommandStrategy(self, self.command_queue)
+            self.control_strategy = self.strategies[COMMAND]
 
     def emergency_break(self):
         logging.warning("Emergency break!")
