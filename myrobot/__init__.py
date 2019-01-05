@@ -102,14 +102,14 @@ class Robot(threading.Thread, DistanceEventListener):
 class ControlStrategy:
     def __init__(self, robot):
         self.robot = robot
-        self.interrupt = False
+        self.interrupted = False
 
     def execute(self):
         """Execute single pass of this strategy."""
-        self.interrupt = False
+        self.interrupted = False
 
     def interrupt(self):
-        self.interrupt = True
+        self.interrupted = True
 
 
 class BackoffStrategy(ControlStrategy):
@@ -120,7 +120,7 @@ class BackoffStrategy(ControlStrategy):
         logging.info("BackoffStrategy::execute()")
         ControlStrategy.execute(self)
         self.robot.motor.backward(100)
-        while not self.interrupt and self.robot.distance_device.get_distance() < 0.10:
+        while not self.interrupted and self.robot.distance_device.get_distance() < 0.10:
             time.sleep(0.1)
         self.robot.motor.stop()
 
@@ -130,16 +130,13 @@ class CommandStrategy(ControlStrategy):
         ControlStrategy.__init__(self, robot)
         self.command_queue = command_queue
 
-    def interrupt(self):
-        self.interrupt = True
-
     def execute(self):
         logging.info("CommandStrategy::execute()")
         ControlStrategy.execute(self)
         logging.info("Waiting for command...")
         while self.command_queue.empty():
             time.sleep(0.1)
-            if self.interrupt:
+            if self.interrupted:
                 return
         try:
             command = self.command_queue.get(timeout=0.1)
@@ -151,14 +148,14 @@ class CommandStrategy(ControlStrategy):
         if command == "forward":
             self.robot.tracker.reset()
             self.robot.motor.forward()
-            while not self.interrupt and self.robot.tracker.get_distance() < 0.5:
+            while not self.interrupted and self.robot.tracker.get_distance() < 0.5:
                 logging.debug("Traveling forward: [%.2f / %.2f m.]" % (self.robot.tracker.get_distance(), 0.5))
                 time.sleep(0.1)
             logging.info("Traveled %.2f , forward.]" % (self.robot.tracker.get_distance(), ))
         elif command == "backward":
             self.robot.tracker.reset()
             self.robot.motor.backward()
-            while not self.interrupt and self.robot.tracker.get_distance() < 0.5:
+            while not self.interrupted and self.robot.tracker.get_distance() < 0.5:
                 logging.debug("Traveling backward: [%.2f / %.2f m.]" % (self.robot.tracker.get_distance(), 0.5))
                 time.sleep(0.1)
             logging.info("Traveled %.2f , backward.]" % (self.robot.tracker.get_distance(), ))
