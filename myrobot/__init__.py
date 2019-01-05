@@ -130,11 +130,14 @@ class CommandStrategy(ControlStrategy):
     def execute(self):
         ControlStrategy.execute(self)
         logging.info("Waiting for command...")
-        command = None
-        while not command:
-            command = self.command_queue.get(timeout=0.1)
+        while self.command_queue.empty():
+            time.sleep(0.1)
             if self.interrupt:
                 return
+        try:
+            command = self.command_queue.get(timeout=0.1)
+        except Empty:
+            return
 
         self.robot.emergency = False
         logging.info("Processing command: [%s]" % (command, ))
