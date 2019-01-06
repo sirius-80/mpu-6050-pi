@@ -72,8 +72,9 @@ class Robot(threading.Thread, Log, DistanceEventListener):
         self.distance_device.close()
 
 
-class ControlStrategy:
+class ControlStrategy(Log):
     def __init__(self, robot):
+        super().__init__()
         self.robot = robot
         self.interrupted = False
 
