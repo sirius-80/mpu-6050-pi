@@ -97,8 +97,8 @@ class BackoffStrategy(ControlStrategy):
     def execute(self):
         self.logger.info("BackoffStrategy::execute()")
         ControlStrategy.execute(self)
-        self.robot.motor.backward(100)
         while not self.interrupted and self.robot.distance_device.get_distance() < 0.10:
+            self.robot.motor.backward(100)
             time.sleep(0.1)
         self.robot.motor.stop()
 
