@@ -12,8 +12,9 @@ except ModuleNotFoundError:
 
 
 class DistanceDevice(Log):
-    def __init__(self, pubsub_client=None, update_frequency=2.0):
+    def __init__(self, distance_callback, pubsub_client=None, update_frequency=2.0):
         super().__init__()
+        self.distance_callback = distance_callback
         self.pubsub_client = pubsub_client
         self.update_frequency = update_frequency
         GPIO.setmode(GPIO.BCM)  # Use broadcom pin numbering
@@ -26,15 +27,10 @@ class DistanceDevice(Log):
         self.distance = None
         self.running = False
         self._thread = threading.Thread(target=self.run, name="DistanceDeviceThread")
-        self.min_distance_callable = (None, None)
 
     def start(self):
         self.running = True
         self._thread.start()
-
-    def set_action_on_min_distance(self, callable, min_distance):
-        """When measured distance falls below given min_distance, given callable is called."""
-        self.min_distance_callable = (min_distance, callable)
 
     def run(self):
         cycle_time = 1.0 / self.update_frequency
@@ -44,11 +40,9 @@ class DistanceDevice(Log):
             self.distance = self.get_distance()
             self.pubsub_client.send_free_space(self.distance)
 
-            min_distance = self.min_distance_callable[0]
-            if min_distance is not None and self.distance < min_distance:
-                self.logger.info("Specified minimum distance (%.02f m) reached (%.02f m)." % (min_distance, self.distance))
+            if self.distance_callback:
                 try:
-                    self.min_distance_callable[1]()
+                    self.distance_callback(self.distance)
                 except:
                     traceback.print_exc()
 
