@@ -35,7 +35,7 @@ class DistanceDevice(Log):
         while self.running:
             start = time.monotonic()
 
-            self.distance = self.get_distance()
+            self.distance = self.measure_distance()
             self.pubsub_client.send_free_space(self.distance)
 
             if self.distance_callback:
@@ -54,6 +54,9 @@ class DistanceDevice(Log):
         self._thread.join(timeout=5.0 / self.update_frequency)
 
     def get_distance(self):
+        return self.distance
+
+    def measure_distance(self):
         """Measures and returns current distance in m."""
         # set Trigger to HIGH
         GPIO.output(self.GPIO_TRIGGER, True)
