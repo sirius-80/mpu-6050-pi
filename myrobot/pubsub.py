@@ -1,5 +1,4 @@
 import paho.mqtt.client as mqtt
-
 from myrobot.log import Log
 
 DEFAULT_MQTT_SERVER = "erik-Aspire-XC-705"

@@ -1,7 +1,5 @@
-import logging
 import time
-
-from myrobot import Log
+from myrobot.log import Log
 
 try:
     import RPi.GPIO as GPIO

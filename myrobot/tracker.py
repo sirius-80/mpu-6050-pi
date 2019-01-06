@@ -1,7 +1,6 @@
 import math
 import struct
 import threading
-
 from myrobot.log import Log
 
 

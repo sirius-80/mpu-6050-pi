@@ -1,9 +1,7 @@
-import logging
 import threading
 import time
 import traceback
-
-from myrobot import Log
+from myrobot.log import Log
 
 try:
     import RPi.GPIO as GPIO

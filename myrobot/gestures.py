@@ -1,8 +1,6 @@
-import logging
 import apds9960
 import smbus
-
-from myrobot import Log
+from myrobot.log import Log
 
 try:
     import RPi.GPIO as GPIO
