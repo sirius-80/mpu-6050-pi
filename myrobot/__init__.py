@@ -10,7 +10,6 @@ import myrobot.pubsub
 from myrobot.log import Log
 
 BACKOFF = 'backoff'
-
 COMMAND = 'command'
 
 
@@ -46,13 +45,13 @@ class Robot(threading.Thread, Log, DistanceEventListener):
     def distance_event(self, distance):
         if distance < 0.1:
             if self.control_strategy is not self.strategies[BACKOFF]:
-                logging.warning("STRATEGY -> BACKOFF")
+                self.logger.warning("STRATEGY -> BACKOFF")
                 self.control_strategy.interrupt()
                 self.control_strategy = self.strategies[BACKOFF]
                 self.control_strategy.proceed()
         else:
             if self.control_strategy is not self.strategies[COMMAND]:
-                logging.warning("STRATEGY -> COMMAND")
+                self.logger.warning("STRATEGY -> COMMAND")
                 self.control_strategy.interrupt()
                 self.control_strategy = self.strategies[COMMAND]
                 self.control_strategy.proceed()
@@ -65,7 +64,7 @@ class Robot(threading.Thread, Log, DistanceEventListener):
         while self.running:
             self.control_strategy.execute()
             self.motor.stop()
-        logging.info("Stopping all robot parts...")
+        self.logger.info("Stopping all robot parts...")
         self.motor.stop()
         self.tracker.stop()
         self.distance_device.stop()
@@ -84,7 +83,7 @@ class ControlStrategy:
         pass
 
     def interrupt(self):
-        logging.info("%s interrupted!!!" % self.__class__)
+        self.logger.info("%s interrupted!!!" % self.__class__)
         self.interrupted = True
 
     def proceed(self):
@@ -96,7 +95,7 @@ class BackoffStrategy(ControlStrategy):
         ControlStrategy.__init__(self, robot)
 
     def execute(self):
-        logging.info("BackoffStrategy::execute()")
+        self.logger.info("BackoffStrategy::execute()")
         ControlStrategy.execute(self)
         self.robot.motor.backward(100)
         while not self.interrupted and self.robot.distance_device.get_distance() < 0.10:
@@ -110,9 +109,9 @@ class CommandStrategy(ControlStrategy):
         self.command_queue = command_queue
 
     def execute(self):
-        logging.info("CommandStrategy::execute()")
+        self.logger.info("CommandStrategy::execute()")
         ControlStrategy.execute(self)
-        logging.info("Waiting for command...")
+        self.logger.info("Waiting for command...")
         while self.command_queue.empty():
             time.sleep(0.1)
             if self.interrupted:
@@ -122,21 +121,21 @@ class CommandStrategy(ControlStrategy):
         except Empty:
             return
 
-        logging.info("Processing command: [%s]" % (command, ))
+        self.logger.info("Processing command: [%s]" % (command, ))
         if command == "forward":
             self.robot.tracker.reset()
             self.robot.motor.forward()
             while not self.interrupted and self.robot.tracker.get_distance() < 0.5:
-                logging.debug("Traveling forward: [%.2f / %.2f m.]" % (self.robot.tracker.get_distance(), 0.5))
+                self.logger.debug("Traveling forward: [%.2f / %.2f m.]" % (self.robot.tracker.get_distance(), 0.5))
                 time.sleep(0.1)
-            logging.info("Traveled %.2f , forward.]" % (self.robot.tracker.get_distance(), ))
+            self.logger.info("Traveled %.2f , forward.]" % (self.robot.tracker.get_distance(), ))
         elif command == "backward":
             self.robot.tracker.reset()
             self.robot.motor.backward()
             while not self.interrupted and self.robot.tracker.get_distance() < 0.5:
-                logging.debug("Traveling backward: [%.2f / %.2f m.]" % (self.robot.tracker.get_distance(), 0.5))
+                self.logger.debug("Traveling backward: [%.2f / %.2f m.]" % (self.robot.tracker.get_distance(), 0.5))
                 time.sleep(0.1)
-            logging.info("Traveled %.2f , backward.]" % (self.robot.tracker.get_distance(), ))
+            self.logger.info("Traveled %.2f , backward.]" % (self.robot.tracker.get_distance(), ))
         elif command == "left":
             self.robot.motor.turn_left()
         elif command == "right":
