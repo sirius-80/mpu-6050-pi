@@ -7,13 +7,15 @@ import myrobot.tracker
 import myrobot.gestures
 import myrobot.distance
 import myrobot.pubsub
+from myrobot.log import Log
 
 
-class Robot(threading.Thread):
+class Robot(threading.Thread, Log):
     """Creates a new robot. The robot takes gestures as commands, and uses an internal queue to process the commands
     into motor-commands (i.e. drive, turn)."""
     def __init__(self):
-        threading.Thread.__init__(self)
+        Log.__init__(self)
+        threading.Thread.__init__(self, name="RobotThread")
         self.command_queue = queue.Queue(1)
         self.motor = myrobot.motor.Motor()
         pubsub = myrobot.pubsub.PubSubClient()
@@ -32,7 +34,7 @@ class Robot(threading.Thread):
         threading.Thread.start(self)
 
     def emergency_break(self):
-        logging.warning("Emergency break!")
+        self.logger.warning("Emergency break!")
         self.emergency = True
 
     def stop(self):
@@ -42,30 +44,30 @@ class Robot(threading.Thread):
     def run(self):
         while self.running:
             self.emergency = False
-            logging.info("Waiting for command...")
+            self.logger.info("Waiting for command...")
             command = self.command_queue.get()
-            logging.info("Processing command: [%s]" % (command, ))
+            self.logger.info("Processing command: [%s]" % (command, ))
             if command == "forward":
                 self.tracker.reset()
                 self.motor.forward()
                 while not self.emergency and self.tracker.get_distance() < 0.5:
-                    logging.debug("Traveling forward: [%.2f / %.2f m.]" % (self.tracker.get_distance(), 0.5))
+                    self.logger.debug("Traveling forward: [%.2f / %.2f m.]" % (self.tracker.get_distance(), 0.5))
                     time.sleep(0.1)
                 self.motor.stop()
-                logging.info("Traveled %.2f , forward.]" % (self.tracker.get_distance(), ))
+                self.logger.info("Traveled %.2f , forward.]" % (self.tracker.get_distance(), ))
             elif command == "backward":
                 self.tracker.reset()
                 self.motor.backward()
                 while self.tracker.get_distance() < 0.5:
-                    logging.debug("Traveling backward: [%.2f / %.2f m.]" % (self.tracker.get_distance(), 0.5))
+                    self.logger.debug("Traveling backward: [%.2f / %.2f m.]" % (self.tracker.get_distance(), 0.5))
                     time.sleep(0.1)
                 self.motor.stop()
-                logging.info("Traveled %.2f , backward.]" % (self.tracker.get_distance(), ))
+                self.logger.info("Traveled %.2f , backward.]" % (self.tracker.get_distance(), ))
             elif command == "left":
                 self.motor.turn_left()
             elif command == "right":
                 self.motor.turn_right()
-        logging.info("Stopping all robot parts...")
+        self.logger.info("Stopping all robot parts...")
         self.motor.stop()
         self.tracker.stop()
         self.distance_device.stop()

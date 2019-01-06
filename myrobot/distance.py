@@ -3,14 +3,17 @@ import threading
 import time
 import traceback
 
+from myrobot import Log
+
 try:
     import RPi.GPIO as GPIO
 except ModuleNotFoundError:
     import myrobot.gpiostub as GPIO
 
 
-class DistanceDevice:
+class DistanceDevice(Log):
     def __init__(self, pubsub_client=None, update_frequency=2.0):
+        super().__init__()
         self.pubsub_client = pubsub_client
         self.update_frequency = update_frequency
         GPIO.setmode(GPIO.BCM)  # Use broadcom pin numbering
@@ -22,7 +25,7 @@ class DistanceDevice:
         GPIO.setup(self.GPIO_ECHO, GPIO.IN)
         self.distance = None
         self.running = False
-        self._thread = threading.Thread(target=self.run)
+        self._thread = threading.Thread(target=self.run, name="DistanceDeviceThread")
         self.min_distance_callable = (None, None)
 
     def start(self):
@@ -43,7 +46,7 @@ class DistanceDevice:
 
             min_distance = self.min_distance_callable[0]
             if min_distance is not None and self.distance < min_distance:
-                logging.info("Specified minimum distance (%.02f m) reached (%.02f m)." % (min_distance, self.distance))
+                self.logger.info("Specified minimum distance (%.02f m) reached (%.02f m)." % (min_distance, self.distance))
                 try:
                     self.min_distance_callable[1]()
                 except:

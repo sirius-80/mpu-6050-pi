@@ -1,13 +1,15 @@
-import logging
 import math
 import struct
 import threading
 
+from myrobot.log import Log
 
-class Tracker:
+
+class Tracker(Log):
     """Location tracker. Once started will update its location every second.
     """
     def __init__(self, pubsub_client=None):
+        super().__init__()
         self.pubsub_client = pubsub_client
         self.location = (0.0, 0.0)
         self.mouse_fd = open("/dev/input/mice", "rb")
@@ -15,21 +17,23 @@ class Tracker:
         self.start_location = self.location
         self.distance = 0.0
         self.running = False
-        self._thread = threading.Thread(target=self._update_location)
+        self._thread = threading.Thread(target=self._update_location, name="LocationTrackerThread")
 
     def start(self):
         """Start tracking the location."""
+        self.logger.debug("Starting location tracker...")
         self.running = True
         self._thread.start()
 
     def stop(self):
         """Stop tracking the location."""
-        # self.scheduler.shutdown()
+        self.logger.info("Stopping location tracker")
         self.running = False
         self._thread.join()
 
     def reset(self):
         """Resets distance. The start-location is set to the current location."""
+        self.logger.debug("Reset location")
         self.start_location = self.location
         self.distance = 0
 
@@ -51,4 +55,4 @@ class Tracker:
             self.distance += math.sqrt(dx*dx + dy*dy)
 
             self.pubsub_client.send_location(*self.location)
-            logging.debug("Location update. Now at (%.02f, %.02f)" % self.location)
+            self.logger.debug("Location update. Now at (%.02f, %.02f)" % self.location)

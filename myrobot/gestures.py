@@ -1,16 +1,20 @@
 import logging
 import apds9960
 import smbus
+
+from myrobot import Log
+
 try:
     import RPi.GPIO as GPIO
 except ModuleNotFoundError:
     import myrobot.gpiostub as GPIO
 
 
-class GestureReceiver(object):
+class GestureReceiver(Log):
     """Initializes the apds9960 module and posts any gestures made to the provided queue.
     Supported gestures are: 'forward', 'backward', 'left' and 'right'."""
     def __init__(self, queue):
+        super().__init__()
         self.queue = queue
         GPIO.setmode(GPIO.BCM) # Use broadcom pin numbering
         GPIO.setwarnings(False)
@@ -33,7 +37,7 @@ class GestureReceiver(object):
         }
         direction = directions[self.apds.readGesture()]
         if direction:
-            logging.info("Received gesture: %s on channel %s" % (direction, str(channel)))
+            self.logger.info("Received gesture: %s on channel %s" % (direction, str(channel)))
             self.queue.put(direction)
 
     def close(self):

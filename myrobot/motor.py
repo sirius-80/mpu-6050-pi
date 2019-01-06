@@ -1,4 +1,8 @@
+import logging
 import time
+
+from myrobot import Log
+
 try:
     import RPi.GPIO as GPIO
 except ModuleNotFoundError:
@@ -11,8 +15,9 @@ FORWARD = "FORWARD"
 BACKWARD = "BACKWARD"
 
 
-class Motor(object):
+class Motor(Log):
     def __init__(self):
+        super().__init__()
         GPIO.setmode(GPIO.BCM)  # Use broadcom pin numbering
         GPIO.setwarnings(False)
         self.pwm_left = None
@@ -21,6 +26,7 @@ class Motor(object):
         self.pwm = self._init_motor_controls()
 
     def _init_motor_controls(self):
+        self.logger.debug("Initializing motor controls")
         # set GPIO for Pulse Width Modulated motor control
         GPIO.setup(6, GPIO.OUT)
         GPIO.setup(13, GPIO.OUT)
@@ -41,6 +47,7 @@ class Motor(object):
 
     def turn_right(self):
         """Make a right turn of approximately 90 degrees."""
+        self.logger.debug("Turn right")
         self.pwm[LEFT][BACKWARD].ChangeDutyCycle(0)
         self.pwm[LEFT][FORWARD].ChangeDutyCycle(100)
         self.pwm[RIGHT][BACKWARD].ChangeDutyCycle(100)
@@ -55,6 +62,7 @@ class Motor(object):
 
     def turn_left(self):
         """Make a left turn of approximately 90 degrees."""
+        self.logger.debug("Turn left")
         self.pwm[LEFT][BACKWARD].ChangeDutyCycle(100)
         self.pwm[LEFT][FORWARD].ChangeDutyCycle(0)
         self.pwm[RIGHT][BACKWARD].ChangeDutyCycle(0)
@@ -69,6 +77,7 @@ class Motor(object):
 
     def forward(self, speed=100):
         """Drive forward at given speed. Speed must be an integer in the range [0..100]"""
+        self.logger.debug("Drive forward: %s %%" % speed)
         if speed < 0 or speed > 100:
             raise ValueError("Illegal speed (%d). Speed must be in range [0..100]!")
         self.pwm[LEFT][BACKWARD].ChangeDutyCycle(0)
@@ -78,6 +87,7 @@ class Motor(object):
 
     def backward(self, speed=100):
         """Drive backward at given speed. Speed must be an integer in the range [0..100]"""
+        self.logger.debug("Drive backward: %s %%" % speed)
         if speed < 0 or speed > 100:
             raise ValueError("Illegal speed (%d). Speed must be in range [0..100]!")
         self.pwm[LEFT][BACKWARD].ChangeDutyCycle(speed)
@@ -87,6 +97,7 @@ class Motor(object):
 
     def stop(self):
         """Stop both wheels."""
+        self.logger.debug("Stopping wheels")
         self.pwm[LEFT][BACKWARD].ChangeDutyCycle(0)
         self.pwm[LEFT][FORWARD].ChangeDutyCycle(0)
         self.pwm[RIGHT][BACKWARD].ChangeDutyCycle(0)
@@ -95,6 +106,7 @@ class Motor(object):
     def left_wheel(self, speed):
         """Drive the left-wheel (independent of the right wheel) at given speed.
         Speed must be a value in the range [-100..100]. A negative speed results in backwards wheel rotation."""
+        self.logger.debug("Drive left wheel: %s %%" % speed)
         if speed > 0:
             self.pwm[LEFT][BACKWARD].ChangeDutyCycle(0)
             self.pwm[LEFT][FORWARD].ChangeDutyCycle(speed)
@@ -105,6 +117,7 @@ class Motor(object):
     def right_wheel(self, speed):
         """Drive the right-wheel (independent of the right wheel) at given speed.
         Speed must be a value in the range [-100..100]. A negative speed results in backwards wheel rotation."""
+        self.logger.debug("Drive right wheel: %s %%" % speed)
         if speed > 0:
             self.pwm[RIGHT][BACKWARD].ChangeDutyCycle(0)
             self.pwm[RIGHT][FORWARD].ChangeDutyCycle(speed)
@@ -114,6 +127,7 @@ class Motor(object):
 
     def close(self):
         """Stop motor-controls and cleanup GPIO module."""
+        self.logger.debug("Clean-up motor controls and cleanup GPIO")
         self.pwm[LEFT][FORWARD].stop()
         self.pwm[LEFT][BACKWARD].stop()
         self.pwm[RIGHT][FORWARD].stop()
