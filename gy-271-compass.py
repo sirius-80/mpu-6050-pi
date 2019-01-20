@@ -210,7 +210,8 @@ if __name__ == "__main__":
     while True:
         try:
             x, y, z, t = compass.readRaw()
-            print("x: %.2f, y: %.2f, z: %.2f, t: %.2f" % (x, y, z, t))
+            heading = math.atan2(x, y)
+            print("Heading: %d degr.  (x: %.2f, y: %.2f, z: %.2f, t: %.2f)" % (heading, x, y, z, t))
             time.sleep(0.5)
         except IOError:
             time.sleep(0.5)
