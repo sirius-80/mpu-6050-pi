@@ -6,11 +6,12 @@ import time
 
 port = 1
 bus = smbus.SMBus(port)
-
 apds = APDS9960(bus)
+
 
 def intH(channel):
     print("INTERRUPT")
+
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(4, GPIO.IN)
@@ -26,7 +27,7 @@ dirs = {
 }
 try:
     # Interrupt-Event hinzufuegen, steigende Flanke
-    GPIO.add_event_detect(4, GPIO.FALLING, callback = intH)
+    GPIO.add_event_detect(4, GPIO.FALLING, callback=intH)
 
 #    apds.setProximityIntLowThreshold(50)
 
@@ -42,5 +43,5 @@ try:
 
 finally:
     GPIO.cleanup()
-    print "Bye"
+    print("Bye")
 
