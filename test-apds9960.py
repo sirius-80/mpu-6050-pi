@@ -15,7 +15,7 @@ def intH(channel):
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(4, GPIO.IN)
 
-dirs = #{
+dirs = {
     APDS9960_DIR_NONE: "none",
     APDS9960_DIR_LEFT: "left",
     APDS9960_DIR_RIGHT: "right",
