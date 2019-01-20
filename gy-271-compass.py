@@ -1,7 +1,7 @@
-# #!/usr/bin/python
-# import smbus
-# import math
-# import time
+#!/usr/bin/python
+import smbus
+import math
+import time
 # import paho.mqtt.client as mqtt
 #
 # MQTT_SERVER = "192.168.178.65"
@@ -94,7 +94,6 @@
 #             time.sleep(0.5)
 #         except IOError:
 #             time.sleep(0.5)
-import time
 
 
 class QMC5883:
