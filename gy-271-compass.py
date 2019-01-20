@@ -55,7 +55,7 @@ def get_rotations():
     if heading < 0:
         heading += 2 * math.pi
 
-    print("Heading: %d degr." % (math.degrees(heading)))
+    print("Heading: %d degr. (raw: (%.2f, %.2f, %.2f)" % (math.degrees(heading), x, y, z))
 
 
 if __name__ == "__main__":
