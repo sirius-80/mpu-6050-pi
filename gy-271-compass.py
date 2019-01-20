@@ -2,6 +2,10 @@
 import smbus
 import math
 import time
+import struct
+
+
+
 # import paho.mqtt.client as mqtt
 #
 # MQTT_SERVER = "192.168.178.65"
@@ -190,7 +194,7 @@ class QMC5883:
 
         # Python performs a wrong casting at read_i2c_block_data.
         # The filled buffer has to be onverted afterwards by mpdule Struct
-        register = self.bus.read_i2c_block_data(QMC5883.ADDR, QMC5883.X_LSB, 9);
+        register = self.bus.read_i2c_block_data(QMC5883.ADDR, QMC5883.X_LSB, 9)
 
         # Convert the axis values to signed Short before returning
         x = struct.unpack('<h', bytes([register[0], register[1]]))[0]
